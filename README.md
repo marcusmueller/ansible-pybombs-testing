@@ -39,6 +39,7 @@ Next, modify `pybombs.yml`; you should replace the `staging_repo` and `staging_b
           vars:
                   staging_repo: origin
                   staging_branch: master
+                  pybombs_pip: pybombs
 
 Running
 -------

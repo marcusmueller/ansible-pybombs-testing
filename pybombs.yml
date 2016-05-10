@@ -3,13 +3,18 @@
 - hosts: gnuradio-vms
   vars:
           staging_repo: https://github.com/marcusmueller/gr-recipes.git
+          # default:
+          # staging_repo: origin
           staging_branch: staging
+          # staging_branch: master
+          pybombs_pip: "git+https://github.com/marcusmueller/pybombs"
+          # pybombs_pip: pybombs
   roles:
           - role: bobbyrenwick.pip
           - role: geerlingguy.git
   tasks:
           - name: install pybombs
-            pip: name=pybombs
+            pip: name={{ pybombs_pip }} 
           - name: set up gruser user
             user: name=gruser
           - name: On selinux RH systems, make sure selinux python bindings are installed (or modifying /etc/sudoers will fail)
