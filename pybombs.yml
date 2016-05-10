@@ -7,18 +7,19 @@
           # staging_repo: origin
           staging_branch: staging
           # staging_branch: master
-          pybombs_pip: "git+https://github.com/marcusmueller/pybombs"
+          pybombs_pip: "git+https://github.com/marcusmueller/pybombs.git#egg=pybombs"
           # pybombs_pip: pybombs
   roles:
           - role: bobbyrenwick.pip
           - role: geerlingguy.git
   tasks:
           - name: install pybombs
-            pip: name={{ pybombs_pip }} 
+            pip: name={{ pybombs_pip }}
           - name: set up gruser user
             user: name=gruser
           - name: On selinux RH systems, make sure selinux python bindings are installed (or modifying /etc/sudoers will fail)
             yum: name=libselinux-python state=installed
+            when: ansible_os_family == 'RedHat'
           - name: add gruser to sudoers
             lineinfile: dest=/etc/sudoers state=present line="gruser ALL=(ALL) NOPASSWD:ALL"
           - name: install gr-recipes
@@ -41,6 +42,10 @@
             become: yes
             become_user: gruser
             command: pybombs prefix init /home/gruser/prefix -a default
+          - name: disable progress indication for fetchers
+            become: yes
+            become_user: gruser
+            command: pybombs --prefix /home/gruser/prefix config progress False
           - name: install GNU Radio via pybombs
             become: yes
             become_user: gruser
