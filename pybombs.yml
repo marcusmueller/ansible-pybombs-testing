@@ -1,0 +1,53 @@
+---
+# hosts: servers 
+- hosts: gnuradio-vms
+  vars:
+          staging_repo: https://github.com/marcusmueller/gr-recipes.git
+          staging_branch: staging
+  roles:
+          - role: bobbyrenwick.pip
+          - role: geerlingguy.git
+  tasks:
+          - name: install pybombs
+            pip: name=pybombs
+          - name: set up gruser user
+            user: name=gruser
+          - name: add gruser to sudoers
+            lineinfile: dest=/etc/sudoers state=present line="gruser ALL=(ALL) NOPASSWD:ALL"
+          - name: install gr-recipes
+            become: yes
+            become_user: gruser
+            command: pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
+          - name: install gr-etcetera
+            become: yes
+            become_user: gruser
+            command: pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.git
+          - name: git configuration (necessary for successful git pull)
+            become: yes
+            become_user: gruser
+            copy: src=default-gr-gitconfig dest=/home/gruser/.gitconfig
+          - name: git pull changes from my gr-recipes staging branch
+            become: yes
+            become_user: gruser
+            command: git pull {{ staging_repo }} {{ staging_branch }} chdir=/home/gruser/.pybombs/recipes/gr-recipes
+          - name: set up prefix via pybombs
+            become: yes
+            become_user: gruser
+            command: pybombs prefix init /home/gruser/prefix -a default
+          - name: install GNU Radio via pybombs
+            become: yes
+            become_user: gruser
+            command: pybombs --prefix /home/gruser/prefix install gnuradio
+            register: pybombs
+          - name: check GNU Radio version
+            become: yes
+            become_user: gruser
+            shell: "source /home/gruser/prefix/setup_env.sh && gnuradio-config-info --version executable=/bin/bash"
+            register: gr_version
+          - debug: gr_version
+          - name: check enabled components
+            become: yes
+            become_user: gruser
+            shell: "source /home/gruser/prefix/setup_env.sh && gnuradio-config-info --enabled-components executable=/bin/bash"
+            register: enabled_components
+          - debug: enabled_components
