@@ -16,6 +16,7 @@ Targets
 -------
 
 * `~root/.ssh/authorized_keys` containing your public key (i.e. you need to be able to log in as root without being prompted a password)
+* Python 2 >= 2.7
 
 
 ### Setting up
