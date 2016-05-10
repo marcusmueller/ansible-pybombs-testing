@@ -12,6 +12,8 @@
             pip: name=pybombs
           - name: set up gruser user
             user: name=gruser
+          - name: On selinux RH systems, make sure selinux python bindings are installed (or modifying /etc/sudoers will fail)
+            yum: name=libselinux-python state=installed
           - name: add gruser to sudoers
             lineinfile: dest=/etc/sudoers state=present line="gruser ALL=(ALL) NOPASSWD:ALL"
           - name: install gr-recipes
