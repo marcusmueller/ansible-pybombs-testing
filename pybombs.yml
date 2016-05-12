@@ -1,5 +1,4 @@
 ---
-# hosts: servers 
 - hosts: gnuradio-vms
   vars:
           staging_repo: https://github.com/marcusmueller/gr-recipes.git
@@ -49,17 +48,19 @@
           - name: install GNU Radio via pybombs
             become: yes
             become_user: gruser
-            command: pybombs --prefix /home/gruser/prefix install gnuradio
+            shell: pybombs --prefix /home/gruser/prefix -v install gnuradio &> /tmp/pybombs.log executable=/bin/bash
             register: pybombs
+          - name: fetch pybombs build log
+            fetch: dest=./logs/{{ ansible_ssh_host }}/ flat=yes src=/tmp/pybombs.log
           - name: check GNU Radio version
             become: yes
             become_user: gruser
             shell: "source /home/gruser/prefix/setup_env.sh && gnuradio-config-info --version executable=/bin/bash"
-            register: gr_version
+            register: gr_version.stdout_lines
           - debug: gr_version
           - name: check enabled components
             become: yes
             become_user: gruser
             shell: "source /home/gruser/prefix/setup_env.sh && gnuradio-config-info --enabled-components executable=/bin/bash"
             register: enabled_components
-          - debug: enabled_components
+          - debug: enabled_components.stdout_lines
